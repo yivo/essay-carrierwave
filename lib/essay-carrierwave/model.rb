@@ -1,4 +1,8 @@
 class Essay::ModelFeatures
+  def has_uploaders?
+    has_carrierwave_uploaders?
+  end
+
   def has_carrierwave_uploaders?
     has_own_carrierwave_uploaders? || has_translated_carrierwave_uploaders?
   end

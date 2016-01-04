@@ -1,4 +1,8 @@
 class Essay::AttributeRoles
+  def has_uploader?
+    has_carrierwave_uploader?
+  end
+
   def has_carrierwave_uploader?
     !!model_features.with(:carrierwave) { |cw| cw.uploader_for(this_attribute.name) }
   end
