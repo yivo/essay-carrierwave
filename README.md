@@ -1,19 +1,11 @@
 ```ruby
   class Article < ActiveRecord::Base
-    belongs_to :poster
-    translates :name, :poster_id
+    mount_uploader :poster, PosterUploader
   end
 
-  Article.features.translates_with_globalize?                   # => true
-
-  Article.features.globalize.translated_attribute_names         # => [:name, :poster_id]
-  Article.features.globalize.model_class_for_translations       # => Article::Translation
-  Article.features.globalize.association_for_translations.name  # => :translations
-
-  Article.attribute_roles[:name].translates_with_globalize?           # => true
-  Article.association_roles[:poster].translates_with_globalize?       # => true
-  Article.association_roles[:translations].translates_with_globalize? # => false
-  Article.association_roles[:translations].translation_for_globalize? # => true
+  Article.features.has_carrierwave_uploaders?                   # => true
+  Article.attribute_roles[:poster].has_carrierwave_uploader?    # => true
+  Article.attribute_roles[:poster].carrierwave.mounted_on?      # => :poster
 ```
 
 ## Gemfile
