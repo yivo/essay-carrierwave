@@ -1,4 +1,4 @@
-class Essay::AttributeRoles
+class Essay::AttributeFeatures
   def has_uploader?
     has_carrierwave_uploader?
   end
@@ -25,7 +25,7 @@ class Essay::AttributeRoles
     #   mount_uploader :poster, PosterUploader
     # end
     #
-    # Article.attribute_roles[:poster].carrierwave.uploader => PosterUploader
+    # Article.attribute_features[:poster].carrierwave.uploader => PosterUploader
     #
     def uploader
       top_feature.uploader_for(this_attribute.name)
@@ -35,7 +35,7 @@ class Essay::AttributeRoles
     #   mount_uploader :poster, PosterUploader
     # end
     #
-    # Article.attribute_roles[:poster].carrierwave.mounted_as => :poster
+    # Article.attribute_features[:poster].carrierwave.mounted_as => :poster
     #
     def mounted_as
       top_feature.accessor_for(this_attribute.name)
