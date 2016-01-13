@@ -8,8 +8,8 @@ class Essay::AttributeFeatures
   end
 
   def carrierwave
-    @carrierwave || begin
-      @carrierwave = HasCarrierWaveUploader.new(env) if has_carrierwave_uploader?
+    @carrierwave || if has_carrierwave_uploader?
+      @carrierwave = HasCarrierWaveUploader.new(env)
     end
   end
 
