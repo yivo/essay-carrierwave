@@ -7,7 +7,7 @@ class Essay::AttributeFeatures
   end
 
   def has_carrierwave_uploader?
-    !!model_features.with(:carrierwave) { |cw| cw.uploader_for(this_attribute.name) }
+    !!active_record.features.with(:carrierwave) { |cw| cw.uploader_for(this_attribute.name) }
   end
 
   def carrierwave
@@ -17,10 +17,8 @@ class Essay::AttributeFeatures
   end
 
   serialize do
-    {
-      has_carrierwave_uploader: has_carrierwave_uploader?,
-      carrierwave:              carrierwave.try(:to_hash)
-    }
+    { has_carrierwave_uploader: has_carrierwave_uploader?,
+      carrierwave:              carrierwave.try(:to_hash) }
   end
 
   class HasCarrierWaveUploader < Base
@@ -31,7 +29,7 @@ class Essay::AttributeFeatures
     # Article.attribute_features[:poster].carrierwave.uploader => PosterUploader
     #
     def uploader
-      top_feature.uploader_for(this_attribute.name)
+      carrierwave_feature.uploader_for(this_attribute.name)
     end
 
     # class Article
@@ -41,19 +39,17 @@ class Essay::AttributeFeatures
     # Article.attribute_features[:poster].carrierwave.mounted_as => :poster
     #
     def mounted_as
-      top_feature.accessor_for(this_attribute.name)
+      carrierwave_feature.accessor_for(this_attribute.name)
     end
 
     serialize do
-      {
-        uploader:   uploader.name,
-        mounted_as: mounted_as
-      }
+      { uploader:   uploader.name,
+        mounted_as: mounted_as }
     end
 
   private
-    def top_feature
-      model_features.carrierwave
+    def carrierwave_feature
+      active_record.features.carrierwave
     end
   end
 end

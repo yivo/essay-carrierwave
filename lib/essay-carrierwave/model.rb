@@ -18,7 +18,7 @@ class Essay::ModelFeatures
   # Article.features.has_translated_carrierwave_uploaders? => false
   #
   def has_own_carrierwave_uploaders?
-    model_class.try(:uploaders).present?
+    active_record.try(:uploaders).present?
   end
 
   # class Article
@@ -30,7 +30,7 @@ class Essay::ModelFeatures
   # Article.features.has_translated_carrierwave_uploaders? => true
   #
   def has_translated_carrierwave_uploaders?
-    !!with(:globalize) { |g| g.model_class_for_translations.features.has_carrierwave_uploaders? }
+    !!with(:globalize) { |g| g.active_record_for_translations.features.has_carrierwave_uploaders? }
   end
 
   def carrierwave
@@ -40,12 +40,10 @@ class Essay::ModelFeatures
   end
 
   serialize do
-    {
-      has_carrierwave_uploaders:            has_carrierwave_uploaders?,
+    { has_carrierwave_uploaders:            has_carrierwave_uploaders?,
       has_own_carrierwave_uploaders:        has_own_carrierwave_uploaders?,
       has_translated_carrierwave_uploaders: has_translated_carrierwave_uploaders?,
-      carrierwave:                          carrierwave.try(:to_hash)
-    }
+      carrierwave:                          carrierwave.try(:to_hash) }
   end
 
   class CarrierWave < Base
@@ -56,7 +54,7 @@ class Essay::ModelFeatures
     # Article.features.carrierwave.table => { poster: PosterUploader }
     #
     def table
-      model_class.uploaders
+      active_record.uploaders
     end
 
     # class Article
@@ -66,7 +64,7 @@ class Essay::ModelFeatures
     # Article.features.carrierwave.options => { poster: { mount_on: :poster_path } }
     #
     def options
-      model_class.uploader_options
+      active_record.uploader_options
     end
 
     # class Article
@@ -75,14 +73,12 @@ class Essay::ModelFeatures
     #
     # Article.features.carrierwave.uploader_for(:poster_path) => PosterUploader
     #
-    def uploader_for(attr_name)
-      attr_name = convert_key(attr_name)
-
-      if pair = pair_for(attr_name)
+    def uploader_for(attribute)
+      if pair = pair_for(attribute.to_sym)
         table[pair.first]
 
       else
-        send_to_translation(:uploader_for, attr_name)
+        send_to_translation(:uploader_for, attribute.to_sym)
       end
     end
 
@@ -92,31 +88,29 @@ class Essay::ModelFeatures
     #
     # Article.features.carrierwave.accessor_for(:poster_path) => :poster
     #
-    def accessor_for(attr_name)
-      attr_name = convert_key(attr_name)
+    def accessor_for(attribute)
+      attribute = attribute.to_sym
 
-      if table.has_key?(attr_name)
-        attr_name
+      if table.has_key?(attribute)
+        attribute
 
-      elsif pair = pair_for(attr_name)
+      elsif pair = pair_for(attribute)
         pair.first
 
       else
-        send_to_translation(:accessor_for, attr_name)
+        send_to_translation(:accessor_for, attribute)
       end
     end
 
     serialize do
-      {
-        table:   table,
-        options: options
-      }
+      { table:   table,
+        options: options }
     end
 
   private
     def pair_for(mounted_on_or_attr_name)
       all_options = options
-      key = convert_key(mounted_on_or_attr_name)
+      key         = mounted_on_or_attr_name.to_sym
 
       if all_options.has_key?(key)
         {key => all_options[key]}
@@ -127,13 +121,9 @@ class Essay::ModelFeatures
       end
     end
 
-    def convert_key(key)
-      key.is_a?(Symbol) ? key : key.to_sym
-    end
-
     def send_to_translation(method, *args)
-      model_features.with(:globalize) do |g|
-        g.model_class_for_translations.features.carrierwave.send(method, *args)
+      active_record.features.with(:globalize) do |g|
+        g.active_record_for_translations.features.carrierwave.send(method, *args)
       end
     end
   end
